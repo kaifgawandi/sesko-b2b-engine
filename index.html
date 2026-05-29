@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SESKO B2B Intelligence Hub</title>
+    <style>
+        :root {
+            /* 2026 Soft-Tech Professional Palette */
+            --bg-main: #1F2532;       
+            --bg-card: #283142;       
+            --border-color: #3A465C;  
+            --text-primary: #F4F5F7;  
+            --text-secondary: #94A3B8;
+            --primary-teal: #14C0CC;  
+            --accent-green: #A6CD4E;  
+            --accent-blue: #3B82F6;
+        }
+
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        header {
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1.5rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header-titles h1 {
+            margin: 0;
+            font-size: 2rem;
+            letter-spacing: -0.025em;
+        }
+
+        .header-titles h1 span {
+            color: var(--primary-teal);
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            margin: 0.5rem 0 0 0;
+            font-size: 0.95rem;
+        }
+
+        /* --- New Engine Controls --- */
+        .engine-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background-color: rgba(30, 41, 59, 0.5);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            flex-wrap: wrap;
+        }
+
+        .engine-controls label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .limit-selector {
+            background-color: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 0.5rem;
+            border-radius: 6px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .process-btn {
+            background-color: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            font-size: 0.85rem;
+            font-weight: 700;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .process-btn:hover {
+            background-color: #2563EB;
+        }
+
+        .export-btn {
+            background-color: var(--accent-green);
+            color: #111827;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            font-size: 0.85rem;
+            font-weight: 700;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            opacity: 0.5; /* Dimmed until data is processed */
+            pointer-events: none; 
+        }
+
+        .export-btn.ready {
+            opacity: 1;
+            pointer-events: auto;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .export-btn.ready:hover {
+            background-color: #92b842;
+            transform: translateY(-2px);
+        }
+
+        /* --- Tab System --- */
+        .tabs-container {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .tab-button {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            position: relative;
+            transition: color 0.2s;
+        }
+
+        .tab-button.active {
+            color: var(--primary-teal);
+        }
+
+        .tab-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: -0.6rem;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background-color: var(--primary-teal);
+            border-radius: 2px;
+        }
+
+        /* --- Grid & Cards --- */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .tag {
+            display: inline-block;
+            background: rgba(20, 192, 204, 0.15);
+            color: var(--primary-teal);
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .asset-name { font-size: 1.1rem; font-weight: 600; margin: 0 0 1rem 0; }
+        .price-row { display: flex; justify-content: space-between; border-top: 1px solid var(--border-color); padding-top: 1rem; margin-top: 1rem; }
+        .price-label { color: var(--text-secondary); font-size: 0.85rem; }
+        .price-value { font-size: 1.4rem; font-weight: 700; color: var(--accent-green); }
+        .timestamp { font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.5rem; text-align: right; }
+
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <div class="header-titles">
+                <h1>SESKO <span>B2B Intelligence</span></h1>
+                <p class="subtitle">Live market feed tracking verified corporate assets and liquidation pricing streams</p>
+            </div>
+            
+            <div class="engine-controls">
+                <label for="record-limit">Extract Volume:</label>
+                <select id="record-limit" class="limit-selector">
+                    <option value="10">10 Records</option>
+                    <option value="25" selected>25 Records</option>
+                    <option value="50">50 Records</option>
+                    <option value="100">100 Records</option>
+                </select>
+                <button class="process-btn" id="process-action-btn" onclick="fetchMarketData()">Process Stream</button>
+                <button class="export-btn" id="export-action-btn" onclick="exportToCSV()">Download Feed (.CSV)</button>
+            </div>
+        </header>
+
+        <div class="tabs-container">
+            <button class="tab-button active" onclick="switchDataset('ALL')">All Feeds</button>
+            <button class="tab-button" onclick="switchDataset('LAPTOPS')">Wholesale Laptops</button>
+            <button class="tab-button" onclick="switchDataset('LIQUIDATION')">Liquidation Pools</button>
+        </div>
+
+        <main id="feed-container" class="grid">
+            <div class="empty-state">Select extraction volume and click "Process Stream" to initialize database connection.</div>
+        </main>
+    </div>
+
+    <script>
+        let masterDatabaseState = [];
+        let filteredDatabaseState = [];
+        let currentActiveTab = 'ALL';
+
+        async function fetchMarketData() {
+            const container = document.getElementById('feed-container');
+            const processBtn = document.getElementById('process-action-btn');
+            const exportBtn = document.getElementById('export-action-btn');
+            
+            // Get the user's chosen limit
+            const limit = document.getElementById('record-limit').value;
+            
+            // Visual feedback: Processing state
+            processBtn.innerText = "Processing...";
+            container.innerHTML = `<div class="empty-state" style="border-color: var(--primary-teal);">Extracting ${limit} records from backend vault...</div>`;
+            exportBtn.classList.remove('ready');
+
+            try {
+                // Dynamically inject the user's limit into the FastAPI URL
+                // Correct syntax for relative network routing
+                const response = await fetch(`/v1/intelligence?limit=${limit}`);
+                const data = await response.json();
+                
+                masterDatabaseState = data.feeds;
+                
+                // Simulate a slight delay so the user "feels" the software working
+                setTimeout(() => {
+                    renderActiveDataset();
+                    processBtn.innerText = "Process Stream";
+                    exportBtn.classList.add('ready'); // Activate export button
+                }, 600);
+
+            } catch (error) {
+                console.error('API Error:', error);
+                processBtn.innerText = "Process Stream";
+                container.innerHTML = `
+                    <div class="empty-state" style="border-color: #EF4444; color: #FCA5A5;">
+                        <strong>API Data Stream Offline</strong>
+                    </div>`;
+            }
+        }
+
+        function renderActiveDataset() {
+            const container = document.getElementById('feed-container');
+            container.innerHTML = '';
+
+            if (currentActiveTab === 'ALL') {
+                filteredDatabaseState = masterDatabaseState;
+            } else {
+                filteredDatabaseState = masterDatabaseState.filter(item => 
+                    item.sub_category.toUpperCase() === currentActiveTab
+                );
+            }
+
+            const exportBtn = document.getElementById('export-action-btn');
+            exportBtn.innerText = `Download ${currentActiveTab === 'ALL' ? 'All' : currentActiveTab} (.CSV)`;
+
+            if (filteredDatabaseState.length === 0) {
+                container.innerHTML = `<div class="empty-state">No listings matching the "${currentActiveTab}" data layer found in current extraction.</div>`;
+                return;
+            }
+
+            filteredDatabaseState.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                const price = item.data_payload.price_usd ? `$${item.data_payload.price_usd.toLocaleString()}` : 'N/A';
+                const dateParsed = new Date(item.scrape_timestamp).toLocaleString();
+
+                card.innerHTML = `
+                    <div class="tag">${item.sub_category}</div>
+                    <div class="asset-name">${item.entity_name}</div>
+                    <div class="price-row">
+                        <span class="price-label">Market Value</span>
+                        <span class="price-value">${price}</span>
+                    </div>
+                    <div class="timestamp">Logged: ${dateParsed}</div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function switchDataset(tabName) {
+            currentActiveTab = tabName;
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach(btn => {
+                if (btn.innerText.toUpperCase().includes(tabName) || (tabName === 'ALL' && btn.innerText === 'All Feeds')) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            // Only re-render if data has already been fetched
+            if (masterDatabaseState.length > 0) {
+                renderActiveDataset();
+            }
+        }
+
+        function exportToCSV() {
+            if (filteredDatabaseState.length === 0) return;
+            const headers = ['Category', 'Product Name', 'Price', 'Currency', 'Timestamp'];
+            const csvRows = filteredDatabaseState.map(item => {
+                const cleanName = `"${item.entity_name.replace(/"/g, '""')}"`;
+                const price = item.data_payload.price_usd || '0';
+                const currency = item.data_payload.currency || 'USD';
+                return [item.sub_category, cleanName, price, currency, item.scrape_timestamp].join(',');
+            });
+            const csvContent = [headers.join(','), ...csvRows].join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `SESKO_${currentActiveTab}_Feed.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>
